@@ -21,27 +21,27 @@
 #pragma newdecls required
 
 #define PLUGIN_VERSION			"1.1"
-#define PLUGIN_VERSION_REVISION	"custom"
-#define PLUGIN_VERSION_FULL		"Rewrite " ... PLUGIN_VERSION ... "." ... PLUGIN_VERSION_REVISION
+#define PLUGIN_VERSION_REVISION "custom"
+#define PLUGIN_VERSION_FULL		"Rewrite " ... PLUGIN_VERSION... "." ... PLUGIN_VERSION_REVISION
 
-#define FILE_CHARACTERS	"data/freak_fortress_2/characters.cfg"
-#define FOLDER_CONFIGS	"configs/freak_fortress_2"
+#define FILE_CHARACTERS			"data/freak_fortress_2/characters.cfg"
+#define FOLDER_CONFIGS			"configs/freak_fortress_2"
 
-#define MAJOR_REVISION	1
-#define MINOR_REVISION	11
-#define STABLE_REVISION	0
+#define MAJOR_REVISION			1
+#define MINOR_REVISION			11
+#define STABLE_REVISION			0
 
-#define GITHUB_URL	"github.com/Batfoxkid/Freak-Fortress-2-Rewrite"
+#define GITHUB_URL				"github.com/Batfoxkid/Freak-Fortress-2-Rewrite"
 
-#define FAR_FUTURE		100000000.0
-#define MAXENTITIES		2048
-#define MAXTF2PLAYERS	36
+#define FAR_FUTURE				100000000.0
+#define MAXENTITIES				2048
+#define MAXTF2PLAYERS			36
 
-#define TFTeam_Unassigned	0
-#define TFTeam_Spectator	1
-#define TFTeam_Red			2
-#define TFTeam_Blue			3
-#define TFTeam_MAX			4
+#define TFTeam_Unassigned		0
+#define TFTeam_Spectator		1
+#define TFTeam_Red				2
+#define TFTeam_Blue				3
+#define TFTeam_MAX				4
 
 enum TFStatType_t
 {
@@ -118,53 +118,50 @@ enum
 enum SectionType
 {
 	Section_Unknown = 0,
-	Section_Ability,	// ability | Ability Name
-	Section_Map,		// map_
-	Section_Weapon,		// weapon | wearable | tf_ | saxxy
-	Section_Sound,		// sound_ | catch_
-	Section_ModCache,	// mod_precache
-	Section_Precache,	// precache
-	Section_Download,	// download
-	Section_Model,		// mod_download
-	Section_Material	// mat_download
+	Section_Ability,	 // ability | Ability Name
+	Section_Map,		 // map_
+	Section_Weapon,		 // weapon | wearable | tf_ | saxxy
+	Section_Sound,		 // sound_ | catch_
+	Section_ModCache,	 // mod_precache
+	Section_Precache,	 // precache
+	Section_Download,	 // download
+	Section_Model,		 // mod_download
+	Section_Material	 // mat_download
 };
 
 enum struct SoundEnum
 {
-	char Sound[PLATFORM_MAX_PATH];
-	char Name[64];
-	char Artist[64];
+	char  Sound[PLATFORM_MAX_PATH];
+	char  Name[64];
+	char  Artist[64];
 	float Time;
-	
-	char Overlay[PLATFORM_MAX_PATH];
+
+	char  Overlay[PLATFORM_MAX_PATH];
 	float Duration;
-	
-	int Entity;
-	int Channel;
-	int Level;
-	int Flags;
+
+	int	  Entity;
+	int	  Channel;
+	int	  Level;
+	int	  Flags;
 	float Volume;
-	int Pitch;
-	
-	void Default()
-	{
-		this.Entity = SOUND_FROM_PLAYER;
-		this.Channel = SNDCHAN_AUTO;
-		this.Level = SNDLEVEL_NORMAL;
-		this.Flags = SND_NOFLAGS;
-		this.Volume = SNDVOL_NORMAL;
-		this.Pitch = SNDPITCH_NORMAL;
-	}
+	int	  Pitch;
+
+	void  Default(){
+		 this.Entity  = SOUND_FROM_PLAYER;
+		 this.Channel = SNDCHAN_AUTO;
+		 this.Level	  = SNDLEVEL_NORMAL;
+		 this.Flags	  = SND_NOFLAGS;
+		 this.Volume  = SNDVOL_NORMAL;
+		 this.Pitch	  = SNDPITCH_NORMAL; }
 }
 
 public const char SndExts[][] = { ".mp3", ".wav" };
 
-public const int TeamColors[][] =
-{
-	{255, 255, 100, 255},
-	{100, 255, 100, 255},
-	{255, 100, 100, 255},
-	{100, 100, 255, 255}
+public const int TeamColors[][] = {
+	{255,  255, 100, 255},
+	{ 100, 255, 100, 255},
+	{ 255, 100, 100, 255},
+	{ 100, 100, 255, 255}
 };
 
 enum
@@ -172,17 +169,17 @@ enum
 	Version,
 	NextCharset,
 	Debugging,
-	
+
 	AggressiveOverlay,
 	AggressiveSwap,
-	
+
 	SoundType,
 	BossTriple,
 	BossCrits,
 	BossHealing,
 	BossKnockback,
 	BossSapper,
-	
+
 	BossVsBoss,
 	SpecTeam,
 	CaptureTime,
@@ -194,28 +191,28 @@ enum
 	PlayerGlow,
 	BossSewer,
 	Telefrags,
-	
+
 	PrefBlacklist,
 	PrefToggle,
 	PrefSpecial,
-	
+
 	AllowSpectators,
 	MovementFreeze,
 	PreroundTime,
-	//BonusRoundTime,
+	// BonusRoundTime,
 	Tournament,
-	
+
 	Cvar_MAX
 }
 
 ConVar Cvar[Cvar_MAX];
 
-int PlayersAlive[TFTeam_MAX];
-int MaxPlayersAlive[TFTeam_MAX];
-int Charset;
-bool Enabled;
-int RoundStatus;
-bool PluginsEnabled;
+int	   PlayersAlive[TFTeam_MAX];
+int	   MaxPlayersAlive[TFTeam_MAX];
+int	   Charset;
+bool   Enabled;
+int	   RoundStatus;
+bool   PluginsEnabled;
 Handle PlayerHud;
 Handle ThisPlugin;
 
@@ -249,22 +246,25 @@ Handle ThisPlugin;
 
 public Plugin myinfo =
 {
-	name		=	"Freak Fortress 2: Rewrite",
-	author		=	"Batfoxkid based on the original done by many others",
-	description	=	"It's like Christmas Morning",
-	version		=	PLUGIN_VERSION ... "." ... PLUGIN_VERSION_REVISION,
-	url			=	"https://forums.alliedmods.net/forumdisplay.php?f=154"
+	name		= "Freak Fortress 2: Rewrite",
+	author		= "Batfoxkid based on the original done by many others",
+	description = "It's like Christmas Morning",
+	version		= PLUGIN_VERSION... "." ... PLUGIN_VERSION_REVISION,
+	url			= "https://forums.alliedmods.net/forumdisplay.php?f=154"
+
+
 }
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+public APLRes
+	AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	char plugin[PLATFORM_MAX_PATH];
 	GetPluginFilename(myself, plugin, sizeof(plugin));
-	if(!StrContains(plugin, "freaks", false))
+	if (!StrContains(plugin, "freaks", false))
 		return APLRes_SilentFailure;
-	
+
 	ThisPlugin = myself;
-	
+
 	Forward_PluginLoad();
 	ForwardOld_PluginLoad();
 	Native_PluginLoad();
@@ -280,11 +280,11 @@ public void OnPluginStart()
 	LoadTranslations("ff2_rewrite.phrases");
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	if(!TranslationPhraseExists("Difficulty Menu"))
+	if (!TranslationPhraseExists("Difficulty Menu"))
 		SetFailState("Translation file \"ff2_rewrite.phrases\" is outdated");
-	
+
 	PlayerHud = CreateHudSynchronizer();
-	
+
 	Attributes_PluginStart();
 	Bosses_PluginStart();
 	Command_PluginStart();
@@ -302,10 +302,10 @@ public void OnPluginStart()
 	TF2U_PluginStart();
 	TFED_PluginStart();
 	Weapons_PluginStart();
-	
-	for(int i = 1; i <= MaxClients; i++)
+
+	for (int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i))
+		if (IsClientInGame(i))
 			OnClientPutInServer(i);
 	}
 }
@@ -326,7 +326,7 @@ public void OnConfigsExecuted()
 {
 	char mapname[64];
 	GetCurrentMap(mapname, sizeof(mapname));
-	if(Configs_CheckMap(mapname))
+	if (Configs_CheckMap(mapname))
 	{
 		Charset = Cvar[NextCharset].IntValue;
 	}
@@ -334,7 +334,7 @@ public void OnConfigsExecuted()
 	{
 		Charset = -1;
 	}
-	
+
 	Bosses_BuildPacks(Charset, mapname);
 	ConVar_ConfigsExecuted();
 	Preference_ConfigsExecuted();
@@ -391,7 +391,7 @@ public void OnClientDisconnect(int client)
 	Database_ClientDisconnect(client);
 	Events_CheckAlivePlayers(client);
 	Preference_ClientDisconnect(client);
-	
+
 	Client(client).ResetByAll();
 }
 
@@ -405,9 +405,9 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
-	if(!Client(client).IsBoss || Client(client).Crits || TF2_IsCritBoosted(client))
+	if (!Client(client).IsBoss || Client(client).Crits || TF2_IsCritBoosted(client))
 		return Plugin_Continue;
-	
+
 	result = false;
 	return Plugin_Changed;
 }

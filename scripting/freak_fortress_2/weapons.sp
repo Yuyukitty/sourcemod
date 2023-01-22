@@ -16,15 +16,15 @@
 	void Weapons_EntityCreated(int entity, const char[] classname)
 */
 
-#tryinclude <cwx>
-#tryinclude <tf_custom_attributes>
+#tryinclude < cwx>
+#tryinclude < tf_custom_attributes>
 
 #pragma semicolon 1
 #pragma newdecls required
 
-#define CWX_LIBRARY		"cwx"
-#define TCA_LIBRARY		"tf2custattr"
-#define FILE_WEAPONS	"data/freak_fortress_2/weapons.cfg"
+#define CWX_LIBRARY	 "cwx"
+#define TCA_LIBRARY	 "tf2custattr"
+#define FILE_WEAPONS "data/freak_fortress_2/weapons.cfg"
 
 #if defined __cwx_included
 static bool CWXLoaded;
@@ -35,16 +35,16 @@ static bool TCALoaded;
 #endif
 
 static ConfigMap WeaponCfg;
-static int HasCritGlow[MAXTF2PLAYERS];
+static int		 HasCritGlow[MAXTF2PLAYERS];
 
-void Weapons_PluginLoad()
+void			 Weapons_PluginLoad()
 {
-	#if defined __tf_custom_attributes_included
+#if defined __tf_custom_attributes_included
 	MarkNativeAsOptional("TF2CustAttr_GetAttributeKeyValues");
 	MarkNativeAsOptional("TF2CustAttr_GetFloat");
 	MarkNativeAsOptional("TF2CustAttr_GetInt");
 	MarkNativeAsOptional("TF2CustAttr_SetString");
-	#endif
+#endif
 }
 
 void Weapons_PluginStart()
@@ -54,63 +54,63 @@ void Weapons_PluginStart()
 	RegFreakCmd("weapon", Weapons_ChangeMenuCmd, "View Weapon Changes", FCVAR_HIDDEN);
 	RegAdminCmd("ff2_refresh", Weapons_DebugRefresh, ADMFLAG_CHEATS, "Refreshes weapons and attributes");
 	RegAdminCmd("ff2_reloadweapons", Weapons_DebugReload, ADMFLAG_RCON, "Reloads the weapons config");
-	
-	#if defined __cwx_included
+
+#if defined __cwx_included
 	CWXLoaded = LibraryExists(CWX_LIBRARY);
-	#endif
-	
-	#if defined __tf_custom_attributes_included
+#endif
+
+#if defined __tf_custom_attributes_included
 	TCALoaded = LibraryExists(TCA_LIBRARY);
-	#endif
+#endif
 }
 
 stock void Weapons_LibraryAdded(const char[] name)
 {
-	#if defined __cwx_included
-	if(!CWXLoaded && StrEqual(name, CWX_LIBRARY))
+#if defined __cwx_included
+	if (!CWXLoaded && StrEqual(name, CWX_LIBRARY))
 		CWXLoaded = true;
-	#endif
-	
-	#if defined __tf_custom_attributes_included
-	if(!TCALoaded && StrEqual(name, TCA_LIBRARY))
+#endif
+
+#if defined __tf_custom_attributes_included
+	if (!TCALoaded && StrEqual(name, TCA_LIBRARY))
 		TCALoaded = true;
-	#endif
+#endif
 }
 
 stock void Weapons_LibraryRemoved(const char[] name)
 {
-	#if defined __cwx_included
-	if(CWXLoaded && StrEqual(name, CWX_LIBRARY))
+#if defined __cwx_included
+	if (CWXLoaded && StrEqual(name, CWX_LIBRARY))
 		CWXLoaded = false;
-	#endif
-	
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded && StrEqual(name, TCA_LIBRARY))
+#endif
+
+#if defined __tf_custom_attributes_included
+	if (TCALoaded && StrEqual(name, TCA_LIBRARY))
 		TCALoaded = false;
-	#endif
+#endif
 }
 
 public Action Weapons_DebugRefresh(int client, int args)
 {
 	TF2_RemoveAllItems(client);
-	
+
 	int entity, i;
-	while(TF2U_GetWearable(client, entity, i))
+	while (TF2U_GetWearable(client, entity, i))
 	{
 		TF2_RemoveWearable(client, entity);
 	}
-	
+
 	TF2_RegeneratePlayer(client);
 	return Plugin_Handled;
 }
 
 public Action Weapons_DebugReload(int client, int args)
 {
-	if(Weapons_ConfigsExecuted(true))
+	if (Weapons_ConfigsExecuted(true))
 	{
 		FReplyToCommand(client, "Reloaded");
 	}
-	else if(client && CheckCommandAccess(client, "sm_rcon", ADMFLAG_RCON))
+	else if (client && CheckCommandAccess(client, "sm_rcon", ADMFLAG_RCON))
 	{
 		FReplyToCommand(client, "Config Error, use sm_rcon to print errors");
 	}
@@ -123,7 +123,7 @@ public Action Weapons_DebugReload(int client, int args)
 
 public Action Weapons_ChangeMenuCmd(int client, int args)
 {
-	if(client)
+	if (client)
 	{
 		Menu_Command(client);
 		Weapons_ChangeMenu(client);
@@ -134,37 +134,37 @@ public Action Weapons_ChangeMenuCmd(int client, int args)
 bool Weapons_ConfigsExecuted(bool force = false)
 {
 	ConfigMap cfg;
-	if(Enabled || force)
+	if (Enabled || force)
 	{
 		cfg = new ConfigMap(FILE_WEAPONS);
-		if(!cfg)
+		if (!cfg)
 			return false;
 	}
-	
-	if(WeaponCfg)
+
+	if (WeaponCfg)
 	{
 		DeleteCfg(WeaponCfg);
 		WeaponCfg = null;
 	}
-	
-	if(Enabled || force)
+
+	if (Enabled || force)
 		WeaponCfg = cfg;
-	
+
 	return true;
 }
 
 void Weapons_ChangeMenu(int client, int time = MENU_TIME_FOREVER)
 {
-	if(Client(client).IsBoss)
+	if (Client(client).IsBoss)
 	{
 		char buffer[512];
-		if(Bosses_GetBossNameCfg(Client(client).Cfg, buffer, sizeof(buffer), GetClientLanguage(client), "description"))
+		if (Bosses_GetBossNameCfg(Client(client).Cfg, buffer, sizeof(buffer), GetClientLanguage(client), "description"))
 		{
 			Menu menu = new Menu(Weapons_ChangeMenuH);
-			
+
 			menu.SetTitle(buffer);
-			
-			if(time == MENU_TIME_FOREVER && Menu_BackButton(client))
+
+			if (time == MENU_TIME_FOREVER && Menu_BackButton(client))
 			{
 				FormatEx(buffer, sizeof(buffer), "%t", "Back");
 				menu.AddItem(buffer, buffer);
@@ -173,26 +173,26 @@ void Weapons_ChangeMenu(int client, int time = MENU_TIME_FOREVER)
 			{
 				menu.AddItem(buffer, buffer, ITEMDRAW_SPACER);
 			}
-			
+
 			menu.Display(client, time);
 		}
 	}
-	else if(WeaponCfg && !Client(client).Minion)
+	else if (WeaponCfg && !Client(client).Minion)
 	{
 		SetGlobalTransTarget(client);
-		
+
 		Menu menu = new Menu(Weapons_ChangeMenuH);
 		menu.SetTitle("%t", "Weapon Menu");
-		
+
 		static const char SlotNames[][] = { "Primary", "Secondary", "Melee", "PDA", "Utility", "Building", "Action" };
-		
-		char buffer1[12], buffer2[32];
-		for(int i; i < sizeof(SlotNames); i++)
+
+		char			  buffer1[12], buffer2[32];
+		for (int i; i < sizeof(SlotNames); i++)
 		{
 			FormatEx(buffer2, sizeof(buffer2), "%t", SlotNames[i]);
-			
+
 			int entity = GetPlayerWeaponSlot(client, i);
-			if(entity != -1 && FindWeaponSection(entity))
+			if (entity != -1 && FindWeaponSection(entity))
 			{
 				IntToString(EntIndexToEntRef(entity), buffer1, sizeof(buffer1));
 				menu.AddItem(buffer1, SlotNames[i]);
@@ -202,8 +202,8 @@ void Weapons_ChangeMenu(int client, int time = MENU_TIME_FOREVER)
 				menu.AddItem(buffer1, SlotNames[i], ITEMDRAW_DISABLED);
 			}
 		}
-		
-		if(time == MENU_TIME_FOREVER && Menu_BackButton(client))
+
+		if (time == MENU_TIME_FOREVER && Menu_BackButton(client))
 		{
 			FormatEx(buffer2, sizeof(buffer2), "%t", "Back");
 			menu.AddItem(buffer1, buffer2);
@@ -212,10 +212,10 @@ void Weapons_ChangeMenu(int client, int time = MENU_TIME_FOREVER)
 		{
 			menu.AddItem(buffer1, buffer1, ITEMDRAW_SPACER);
 		}
-		
+
 		FormatEx(buffer2, sizeof(buffer2), "%t", Client(client).NoChanges ? "Enable Weapon Changes" : "Disable Weapon Changes");
 		menu.AddItem(buffer1, buffer2);
-		
+
 		menu.Pagination = 0;
 		menu.ExitButton = true;
 		menu.Display(client, time);
@@ -224,7 +224,7 @@ void Weapons_ChangeMenu(int client, int time = MENU_TIME_FOREVER)
 
 public int Weapons_ChangeMenuH(Menu menu, MenuAction action, int client, int choice)
 {
-	switch(action)
+	switch (action)
 	{
 		case MenuAction_End:
 		{
@@ -232,12 +232,12 @@ public int Weapons_ChangeMenuH(Menu menu, MenuAction action, int client, int cho
 		}
 		case MenuAction_Cancel:
 		{
-			if(choice == MenuCancel_ExitBack)
+			if (choice == MenuCancel_ExitBack)
 				Menu_MainMenu(client);
 		}
 		case MenuAction_Select:
 		{
-			switch(choice)
+			switch (choice)
 			{
 				case 7:
 				{
@@ -253,9 +253,9 @@ public int Weapons_ChangeMenuH(Menu menu, MenuAction action, int client, int cho
 					char buffer[12];
 					menu.GetItem(choice, buffer, sizeof(buffer));
 					int entity = EntRefToEntIndex(StringToInt(buffer));
-					if(entity != INVALID_ENT_REFERENCE)
+					if (entity != INVALID_ENT_REFERENCE)
 						Weapons_ShowChanges(client, entity);
-					
+
 					Weapons_ChangeMenu(client);
 				}
 			}
@@ -266,28 +266,28 @@ public int Weapons_ChangeMenuH(Menu menu, MenuAction action, int client, int cho
 
 void Weapons_ShowChanges(int client, int entity)
 {
-	if(!WeaponCfg)
+	if (!WeaponCfg)
 		return;
 
 	ConfigMap cfg = FindWeaponSection(entity);
 
-	if(!cfg)
+	if (!cfg)
 		return;
 
-	int itemDefIndex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+	int	 itemDefIndex = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 
 	char localizedWeaponName[64];
 	GetEntityClassname(entity, localizedWeaponName, sizeof(localizedWeaponName));
 
-	if(!TF2ED_GetLocalizedItemName(itemDefIndex, localizedWeaponName, sizeof(localizedWeaponName), localizedWeaponName))
+	if (!TF2ED_GetLocalizedItemName(itemDefIndex, localizedWeaponName, sizeof(localizedWeaponName), localizedWeaponName))
 		return;
 
 	SetGlobalTransTarget(client);
-	
+
 	bool found;
 	char buffer2[64];
-	
-	if(cfg.GetBool("strip", found, false) && found)
+
+	if (cfg.GetBool("strip", found, false) && found)
 	{
 		Format(buffer2, sizeof(buffer2), "{olive}[FF2] {default}%%s3 (%t):", "Weapon Stripped");
 		CReplaceColorCodes(buffer2, client, _, sizeof(buffer2));
@@ -304,11 +304,11 @@ void Weapons_ShowChanges(int client, int entity)
 	char description[64];
 	char type[32];
 
-	switch(cfg.GetKeyValType("attributes"))
+	switch (cfg.GetKeyValType("attributes"))
 	{
 		case KeyValType_Value:
 		{
-			int current = 0;
+			int	 current = 0;
 
 			char attributes[512];
 			cfg.Get("attributes", attributes, sizeof(attributes));
@@ -316,61 +316,62 @@ void Weapons_ShowChanges(int client, int entity)
 			do
 			{
 				int add = SplitString(attributes[current], ";", value, sizeof(value));
-				if(add == -1)
+				if (add == -1)
 					break;
-				
+
 				int attrib = StringToInt(value);
-				if(!attrib)
+				if (!attrib)
 					break;
-				
+
 				current += add;
-				add = SplitString(attributes[current], ";", value, sizeof(value));
+				add	  = SplitString(attributes[current], ";", value, sizeof(value));
 				found = add != -1;
 
-				if(found)
+				if (found)
 					current += add;
 				else
 					strcopy(value, sizeof(value), attributes[current]);
-				
-				bool isHidden = (TF2ED_GetAttributeDefinitionString(attrib, "hidden", type, sizeof(type)) && StringToInt(type));
+
+				bool isHidden			  = (TF2ED_GetAttributeDefinitionString(attrib, "hidden", type, sizeof(type)) && StringToInt(type));
 				bool doesDescriptionExist = TF2ED_GetAttributeDefinitionString(attrib, "description_string", description, sizeof(description));
 
-				if(value[0] != 'R' && !isHidden && doesDescriptionExist)
+				if (value[0] != 'R' && !isHidden && doesDescriptionExist)
 				{
 					TF2ED_GetAttributeDefinitionString(attrib, "description_format", type, sizeof(type));
 					FormatValue(value, value, sizeof(value), type);
 					PrintSayText2(client, client, true, description, value);
 				}
-			} while(found);
+			}
+			while (found);
 		}
 		case KeyValType_Section:
 		{
 			cfg = cfg.GetSection("attributes");
 
-			PackVal attributeValue;
+			PackVal			  attributeValue;
 
-			StringMapSnapshot snap = cfg.Snapshot();
+			StringMapSnapshot snap	  = cfg.Snapshot();
 
-			int entries = snap.Length;
+			int				  entries = snap.Length;
 
-			for(int i = 0; i < entries; i++)
+			for (int i = 0; i < entries; i++)
 			{
 				int length = snap.KeyBufferSize(i) + 1;
 
 				char[] key = new char[length];
 				snap.GetKey(i, key, length);
-				
+
 				cfg.GetArray(key, attributeValue, sizeof(attributeValue));
 
-				if(attributeValue.tag == KeyValType_Value)
+				if (attributeValue.tag == KeyValType_Value)
 				{
 					int attrib = TF2ED_TranslateAttributeNameToDefinitionIndex(key);
-					if(attrib != -1)
+					if (attrib != -1)
 					{
-						bool isHidden = (TF2ED_GetAttributeDefinitionString(attrib, "hidden", type, sizeof(type)) && StringToInt(type));
+						bool isHidden			  = (TF2ED_GetAttributeDefinitionString(attrib, "hidden", type, sizeof(type)) && StringToInt(type));
 						bool doesDescriptionExist = TF2ED_GetAttributeDefinitionString(attrib, "description_string", description, sizeof(description));
 
-						if(!isHidden && doesDescriptionExist)
+						if (!isHidden && doesDescriptionExist)
 						{
 							TF2ED_GetAttributeDefinitionString(attrib, "description_format", type, sizeof(type));
 							FormatValue(attributeValue.data, value, sizeof(value), type);
@@ -386,24 +387,24 @@ void Weapons_ShowChanges(int client, int entity)
 
 	cfg = cfg.GetSection("custom");
 
-	if(cfg)
+	if (cfg)
 	{
-		StringMapSnapshot snap = cfg.Snapshot();
-			
-		int entries = snap.Length;
+		StringMapSnapshot snap	  = cfg.Snapshot();
 
-		PackVal val;
+		int				  entries = snap.Length;
 
-		for(int i; i < entries; i++)
+		PackVal			  val;
+
+		for (int i; i < entries; i++)
 		{
 			int length = snap.KeyBufferSize(i) + 1;
 
 			char[] key = new char[length];
 			snap.GetKey(i, key, length);
-			
+
 			cfg.GetArray(key, val, sizeof(val));
 
-			if(val.tag == KeyValType_Value && TranslationPhraseExists(key))
+			if (val.tag == KeyValType_Value && TranslationPhraseExists(key))
 			{
 				FormatValue(val.data, value, sizeof(value), "value_is_percentage");
 				FormatValue(val.data, description, sizeof(description), "value_is_inverted_percentage");
@@ -411,17 +412,17 @@ void Weapons_ShowChanges(int client, int entity)
 				PrintToChat(client, "%t", key, value, description, type, val.data);
 			}
 		}
-		
+
 		delete snap;
 	}
 }
 
 static void FormatValue(const char[] value, char[] buffer, int length, const char[] type)
 {
-	if(StrEqual(type, "value_is_percentage"))
+	if (StrEqual(type, "value_is_percentage"))
 	{
 		float val = StringToFloat(value);
-		if(val < 1.0 && val > -1.0)
+		if (val < 1.0 && val > -1.0)
 		{
 			Format(buffer, length, "%.0f", -(100.0 - (val * 100.0)));
 		}
@@ -430,10 +431,10 @@ static void FormatValue(const char[] value, char[] buffer, int length, const cha
 			Format(buffer, length, "%.0f", val * 100.0 - 100.0);
 		}
 	}
-	else if(StrEqual(type, "value_is_inverted_percentage"))
+	else if (StrEqual(type, "value_is_inverted_percentage"))
 	{
 		float val = StringToFloat(value);
-		if(val < 1.0 && val > -1.0)
+		if (val < 1.0 && val > -1.0)
 		{
 			Format(buffer, length, "%.0f", (100.0 - (val * 100.0)));
 		}
@@ -442,12 +443,12 @@ static void FormatValue(const char[] value, char[] buffer, int length, const cha
 			Format(buffer, length, "%.0f", val * 100.0 - 100.0);
 		}
 	}
-	else if(StrEqual(type, "value_is_additive_percentage"))
+	else if (StrEqual(type, "value_is_additive_percentage"))
 	{
 		float val = StringToFloat(value);
 		Format(buffer, length, "%.0f", val * 100.0);
 	}
-	else if(StrEqual(type, "value_is_particle_index") || StrEqual(type, "value_is_from_lookup_table"))
+	else if (StrEqual(type, "value_is_particle_index") || StrEqual(type, "value_is_from_lookup_table"))
 	{
 		buffer[0] = 0;
 	}
@@ -464,24 +465,24 @@ void Weapons_PlayerDeath(int client)
 
 stock void Weapons_OnHitBossPre(int attacker, int victim, float &damage, int weapon, int critType, int damagecustom)
 {
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
+#if defined __tf_custom_attributes_included
+	if (TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
 	{
 		KeyValues kv = TF2CustAttr_GetAttributeKeyValues(weapon);
-		if(kv)
+		if (kv)
 		{
 			float value = kv.GetFloat("damage vs bosses", 1.0);
-			if(value != 1.0)
+			if (value != 1.0)
 				damage *= value;
-			
+
 			value = kv.GetFloat("charge outlines bosses");
-			if(value > 0.0)
+			if (value > 0.0)
 			{
-				if(HasEntProp(weapon, Prop_Send, "m_flChargedDamage"))
+				if (HasEntProp(weapon, Prop_Send, "m_flChargedDamage"))
 				{
 					value *= 1.0 + (GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") / 50.0);
 				}
-				else if(HasEntProp(weapon, Prop_Send, "m_flMinicritCharge"))
+				else if (HasEntProp(weapon, Prop_Send, "m_flMinicritCharge"))
 				{
 					value *= 1.0 + (GetEntPropFloat(weapon, Prop_Send, "m_flMinicritCharge") / 50.0);
 				}
@@ -489,72 +490,72 @@ stock void Weapons_OnHitBossPre(int attacker, int victim, float &damage, int wea
 				{
 					value *= 1.0 + ((GetEntPropFloat(attacker, Prop_Send, "m_flHypeMeter") + GetEntPropFloat(attacker, Prop_Send, "m_flRageMeter")) / 50.0);
 				}
-				
+
 				Gamemode_SetClientGlow(victim, value);
 			}
-			
-			if(critType != 2)
+
+			if (critType != 2)
 				critType = kv.GetNum("mod crit type on bosses", critType);
-			
+
 			value = kv.GetFloat("multi boss rage", 1.0);
-			if(value != 1.0)
+			if (value != 1.0)
 				Client(victim).RageDebuff *= value;
-			
+
 			char buffer[36];
-			if(damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_FLARE && damagecustom != TF_CUSTOM_BURNING_ARROW)
+			if (damagecustom != TF_CUSTOM_BURNING && damagecustom != TF_CUSTOM_BURNING_FLARE && damagecustom != TF_CUSTOM_BURNING_ARROW)
 			{
 				kv.GetString("mod attribute hit stale", buffer, sizeof(buffer));
-				if(buffer[0])
+				if (buffer[0])
 				{
 					char buffers[16][2];
 					ExplodeString(buffer, ";", buffers, sizeof(buffers), sizeof(buffers[]));
-					
+
 					int attrib = StringToInt(buffers[0]);
-					if(attrib)
+					if (attrib)
 					{
 						SetEntProp(weapon, Prop_Send, "m_iAccountID", 0);
-						
+
 						float initial = 1.0;
 						Attributes_GetByDefIndex(weapon, attrib, initial);
 						TF2Attrib_SetByDefIndex(weapon, attrib, initial + StringToFloat(buffers[1]));
 					}
 				}
 			}
-			
-			if(GetEntityClassname(weapon, buffer, sizeof(buffer)))
+
+			if (GetEntityClassname(weapon, buffer, sizeof(buffer)))
 			{
 				int slot = TF2_GetClassnameSlot(buffer);
-				if(slot >= TFWeaponSlot_Primary && slot <= TFWeaponSlot_Melee)
+				if (slot >= TFWeaponSlot_Primary && slot <= TFWeaponSlot_Melee)
 				{
 					int entity, i;
-					while(TF2_GetItem(attacker, entity, i))
+					while (TF2_GetItem(attacker, entity, i))
 					{
-						if(entity == weapon)
+						if (entity == weapon)
 							continue;
-						
+
 						static const char AttribName[][] = { "primary damage vs bosses", "secondary damage vs bosses", "melee damage vs bosses" };
-						value = TF2CustAttr_GetFloat(entity, AttribName[slot], 1.0);
-						if(value != 1.0)
+						value							 = TF2CustAttr_GetFloat(entity, AttribName[slot], 1.0);
+						if (value != 1.0)
 							damage *= value;
 					}
 				}
 			}
-			
-			if(TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
+
+			if (TF2_IsPlayerInCondition(attacker, TFCond_BlastJumping))
 			{
 				value = kv.GetFloat("mid-air damage vs bosses", 1.0);
-				if(value != 1.0)
+				if (value != 1.0)
 				{
 					damage *= value;
-					
-					if(Attributes_FindOnWeapon(attacker, weapon, 267))	// mod crit while airborne
+
+					if (Attributes_FindOnWeapon(attacker, weapon, 267))	   // mod crit while airborne
 					{
-						if(!Attributes_OnBackstabBoss(attacker, victim, damage, weapon, false))
+						if (!Attributes_OnBackstabBoss(attacker, victim, damage, weapon, false))
 						{
 							EmitSoundToClient(victim, "player/spy_shield_break.wav", _, _, _, _, 0.7);
 							EmitSoundToClient(attacker, "player/spy_shield_break.wav", _, _, _, _, 0.7);
-							
-							if(Cvar[SoundType].BoolValue)
+
+							if (Cvar[SoundType].BoolValue)
 							{
 								Bosses_PlaySoundToAll(victim, "sound_marketed", _, _, _, _, _, 2.0);
 							}
@@ -563,87 +564,87 @@ stock void Weapons_OnHitBossPre(int attacker, int victim, float &damage, int wea
 								Bosses_PlaySoundToAll(victim, "sound_marketed", _, victim, SNDCHAN_AUTO, SNDLEVEL_AIRCRAFT, _, 2.0);
 							}
 						}
-						
+
 						Weapons_OnBackstabBoss(victim, damage, weapon);
-						
+
 						Bosses_UseSlot(victim, 7, 7);
 					}
 				}
 			}
 		}
-		
+
 		delete kv;
 	}
-	#endif
+#endif
 }
 
 stock void Weapons_OnHitBoss(int attacker, int newPlayerDamage, int lastPlayerDamage)
 {
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded)
+#if defined __tf_custom_attributes_included
+	if (TCALoaded)
 	{
 		int weapon, i;
-		while(TF2_GetItem(attacker, weapon, i))
+		while (TF2_GetItem(attacker, weapon, i))
 		{
 			KeyValues kv = TF2CustAttr_GetAttributeKeyValues(weapon);
-			if(kv)
+			if (kv)
 			{
 				int value = kv.GetNum("primary ammo from damage");
-				if(value)
+				if (value)
 				{
 					value = DamageGoal(value, newPlayerDamage, lastPlayerDamage);
-					if(value)
+					if (value)
 						SetEntProp(attacker, Prop_Data, "m_iAmmo", GetEntProp(attacker, Prop_Data, "m_iAmmo", _, 1) + value, _, 1);
 				}
-				
+
 				value = kv.GetNum("secondary ammo from damage");
-				if(value)
+				if (value)
 				{
 					value = DamageGoal(value, newPlayerDamage, lastPlayerDamage);
-					if(value)
+					if (value)
 						SetEntProp(attacker, Prop_Data, "m_iAmmo", GetEntProp(attacker, Prop_Data, "m_iAmmo", _, 2) + value, _, 2);
 				}
 			}
 		}
 	}
-	#endif
+#endif
 }
 
 stock void Weapons_OnAirblastBoss(int attacker)
 {
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded)
+#if defined __tf_custom_attributes_included
+	if (TCALoaded)
 	{
 		int weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
-		if(weapon != -1)
+		if (weapon != -1)
 		{
 			float stale = TF2CustAttr_GetFloat(weapon, "mod airblast stale");
-			if(stale)
+			if (stale)
 			{
 				SetEntProp(weapon, Prop_Send, "m_iAccountID", 0);
-				
+
 				float initial = 1.0;
 				Attributes_GetByDefIndex(weapon, 256, initial);
 				TF2Attrib_SetByDefIndex(weapon, 256, initial + stale);
 			}
 		}
 	}
-	#endif
+#endif
 }
 
 stock void Weapons_OnBackstabBoss(int victim, float &damage, int weapon, float &time = 0.0, float &multi = 0.0)
 {
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
+#if defined __tf_custom_attributes_included
+	if (TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
 	{
 		multi = TF2CustAttr_GetFloat(weapon, "backstab damage percent");
-		if(multi > 0.0)
+		if (multi > 0.0)
 			damage = float(Client(victim).MaxHealth * Client(victim).MaxLives) * multi / 3.0;
-		
-		time = TF2CustAttr_GetFloat(weapon, "backstab stale restore");
+
+		time  = TF2CustAttr_GetFloat(weapon, "backstab stale restore");
 		multi = TF2CustAttr_GetFloat(weapon, "backstab stale multi");
 	}
-	#endif
+#endif
 }
 
 void Weapons_OnInventoryApplication(int userid)
@@ -654,16 +655,16 @@ void Weapons_OnInventoryApplication(int userid)
 public void Weapons_OnInventoryApplicationFrame(int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if(client)
+	if (client)
 		Weapons_OnWeaponSwitch(client, GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon"));
 }
 
 stock void Weapons_OnWeaponSwitch(int client, int weapon)
 {
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
+#if defined __tf_custom_attributes_included
+	if (TCALoaded && weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
 	{
-		switch(HasCritGlow[client])
+		switch (HasCritGlow[client])
 		{
 			case 1:
 			{
@@ -674,9 +675,9 @@ stock void Weapons_OnWeaponSwitch(int client, int weapon)
 				TF2_RemoveCondition(client, TFCond_CritOnDamage);
 			}
 		}
-		
+
 		int type = TF2CustAttr_GetInt(weapon, "mod crit type glow");
-		switch(type)
+		switch (type)
 		{
 			case 1:
 			{
@@ -694,67 +695,67 @@ stock void Weapons_OnWeaponSwitch(int client, int weapon)
 			}
 		}
 	}
-	#endif
+#endif
 }
 
 stock float Weapons_PlayerHurt(int entity)
 {
 	float value = 1.0;
-	
-	#if defined __tf_custom_attributes_included
-	if(TCALoaded)
+
+#if defined __tf_custom_attributes_included
+	if (TCALoaded)
 		value = TF2CustAttr_GetFloat(entity, "multi boss rage", 1.0);
-	#endif
-	
+#endif
+
 	return value;
 }
 
 void Weapons_ApplyCustomAttributes(int entity, ConfigMap cfg)
 {
-	StringMapSnapshot snap = cfg.Snapshot();
-	
-	int entries = snap.Length;
-	for(int i; i < entries; i++)
+	StringMapSnapshot snap	  = cfg.Snapshot();
+
+	int				  entries = snap.Length;
+	for (int i; i < entries; i++)
 	{
 		int length = snap.KeyBufferSize(i) + 1;
-		
+
 		char[] key = new char[length];
 		snap.GetKey(i, key, length);
-		
-		static PackVal attribute;	
+
+		static PackVal attribute;
 		cfg.GetArray(key, attribute, sizeof(attribute));
-		if(attribute.tag == KeyValType_Value)
+		if (attribute.tag == KeyValType_Value)
 		{
-			#if defined __tf_custom_attributes_included
-			if(TCALoaded)
+#if defined __tf_custom_attributes_included
+			if (TCALoaded)
 			{
 				TF2CustAttr_SetString(entity, key, attribute.data);
 			}
 			else
-			#endif
+#endif
 			{
-				if(StrEqual(key, "damage vs bosses"))
+				if (StrEqual(key, "damage vs bosses"))
 				{
 					TF2Attrib_SetByDefIndex(entity, 476, StringToFloat(attribute.data));
 				}
-				else if(StrEqual(key, "mod crit type on bosses"))
+				else if (StrEqual(key, "mod crit type on bosses"))
 				{
 					TF2Attrib_SetByDefIndex(entity, 20, 1.0);
 					TF2Attrib_SetByDefIndex(entity, 408, 1.0);
 
-					if(StringToInt(attribute.data) == 1)
+					if (StringToInt(attribute.data) == 1)
 						TF2Attrib_SetByDefIndex(entity, 868, 1.0);
 				}
 			}
 		}
 	}
-	
+
 	delete snap;
 }
 
 void Weapons_EntityCreated(int entity, const char[] classname)
 {
-	if(WeaponCfg && (!StrContains(classname, "tf_wea") || !StrContains(classname, "tf_powerup_bottle")))
+	if (WeaponCfg && (!StrContains(classname, "tf_wea") || !StrContains(classname, "tf_powerup_bottle")))
 		SDKHook(entity, SDKHook_SpawnPost, Weapons_Spawn);
 }
 
@@ -765,52 +766,51 @@ public void Weapons_Spawn(int entity)
 
 public void Weapons_SpawnFrame(int ref)
 {
-	if(!WeaponCfg)
+	if (!WeaponCfg)
 		return;
-	
+
 	int entity = EntRefToEntIndex(ref);
-	if(entity == INVALID_ENT_REFERENCE)
+	if (entity == INVALID_ENT_REFERENCE)
 		return;
-	
-	if((HasEntProp(entity, Prop_Send, "m_bDisguiseWearable") && GetEntProp(entity, Prop_Send, "m_bDisguiseWearable")) ||
-		(HasEntProp(entity, Prop_Send, "m_bDisguiseWeapon") && GetEntProp(entity, Prop_Send, "m_bDisguiseWeapon")))
+
+	if ((HasEntProp(entity, Prop_Send, "m_bDisguiseWearable") && GetEntProp(entity, Prop_Send, "m_bDisguiseWearable")) || (HasEntProp(entity, Prop_Send, "m_bDisguiseWeapon") && GetEntProp(entity, Prop_Send, "m_bDisguiseWeapon")))
 		return;
-	
+
 	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	if(client < 1 || client > MaxClients || Client(client).IsBoss || Client(client).Minion)
+	if (client < 1 || client > MaxClients || Client(client).IsBoss || Client(client).Minion)
 		return;
-	
+
 	ConfigMap cfg = FindWeaponSection(entity);
-	if(!cfg)
+	if (!cfg)
 		return;
-	
+
 	bool found;
-	if(cfg.GetBool("strip", found, false) && found)
+	if (cfg.GetBool("strip", found, false) && found)
 		DHook_HookStripWeapon(entity);
-	
+
 	int current;
-	
-	if(cfg.GetInt("clip", current))
+
+	if (cfg.GetInt("clip", current))
 	{
 		SetEntProp(entity, Prop_Send, "m_iAccountID", 0);
-		
-		if(HasEntProp(entity, Prop_Data, "m_iClip1"))
+
+		if (HasEntProp(entity, Prop_Data, "m_iClip1"))
 			SetEntProp(entity, Prop_Data, "m_iClip1", current);
 	}
-	
-	if(cfg.GetInt("ammo", current))
+
+	if (cfg.GetInt("ammo", current))
 	{
 		SetEntProp(entity, Prop_Send, "m_iAccountID", 0);
-		
-		if(HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
+
+		if (HasEntProp(entity, Prop_Send, "m_iPrimaryAmmoType"))
 		{
 			int type = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType");
-			if(type >= 0)
+			if (type >= 0)
 				SetEntProp(client, Prop_Data, "m_iAmmo", current, _, type);
 		}
 	}
-	
-	switch(cfg.GetKeyValType("attributes"))
+
+	switch (cfg.GetKeyValType("attributes"))
 	{
 		case KeyValType_Value:
 		{
@@ -823,93 +823,94 @@ public void Weapons_SpawnFrame(int ref)
 			do
 			{
 				int add = SplitString(attributes[current], ";", value, sizeof(value));
-				if(add == -1)
+				if (add == -1)
 					break;
-				
+
 				int attrib = StringToInt(value);
-				if(!attrib)
+				if (!attrib)
 					break;
-				
+
 				current += add;
-				add = SplitString(attributes[current], ";", value, sizeof(value));
+				add	  = SplitString(attributes[current], ";", value, sizeof(value));
 				found = add != -1;
 
-				if(found)
+				if (found)
 					current += add;
 				else
 					strcopy(value, sizeof(value), attributes[current]);
-				
+
 				TF2Attrib_SetByDefIndex(entity, attrib, StringToFloat(value));
-			} while(found);
+			}
+			while (found);
 		}
 		case KeyValType_Section:
 		{
-			cfg = cfg.GetSection("attributes");
+			cfg						  = cfg.GetSection("attributes");
 
-			StringMapSnapshot snap = cfg.Snapshot();
-			int entries = snap.Length;
+			StringMapSnapshot snap	  = cfg.Snapshot();
+			int				  entries = snap.Length;
 
-			PackVal attributeValue;
+			PackVal			  attributeValue;
 
-			for(int i = 0; i < entries; i++)
+			for (int i = 0; i < entries; i++)
 			{
 				int length = snap.KeyBufferSize(i) + 1;
 				char[] key = new char[length];
 
 				snap.GetKey(i, key, length);
-				
+
 				cfg.GetArray(key, attributeValue, sizeof(attributeValue));
 
-				if(attributeValue.tag == KeyValType_Value)
+				if (attributeValue.tag == KeyValType_Value)
 					TF2Attrib_SetByName(entity, key, StringToFloat(attributeValue.data));
 			}
 
 			delete snap;
 		}
 	}
-	
+
 	cfg = cfg.GetSection("custom");
-	if(cfg)
+	if (cfg)
 		Weapons_ApplyCustomAttributes(entity, cfg);
 }
 
 static ConfigMap FindWeaponSection(int entity)
 {
 	char buffer1[64];
-	
-	#if defined __cwx_included
-	if(CWXLoaded && CWX_GetItemUIDFromEntity(entity, buffer1, sizeof(buffer1)) && CWX_IsItemUIDValid(buffer1))
+
+#if defined __cwx_included
+	if (CWXLoaded && CWX_GetItemUIDFromEntity(entity, buffer1, sizeof(buffer1)) && CWX_IsItemUIDValid(buffer1))
 	{
 		Format(buffer1, sizeof(buffer1), "CWX.%s", buffer1);
 		ConfigMap cfg = WeaponCfg.GetSection(buffer1);
-		if(cfg)
+		if (cfg)
 			return cfg;
 	}
-	#endif
-	
+#endif
+
 	ConfigMap cfg = WeaponCfg.GetSection("Indexes");
-	if(cfg)
+	if (cfg)
 	{
-		StringMapSnapshot snap = cfg.Snapshot();
-		
-		int entries = snap.Length;
-		if(entries)
+		StringMapSnapshot snap	  = cfg.Snapshot();
+
+		int				  entries = snap.Length;
+		if (entries)
 		{
-			int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+			int	 index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 			char buffer2[12];
-			for(int i; i < entries; i++)
+			for (int i; i < entries; i++)
 			{
-				int length = snap.KeyBufferSize(i)+1;
+				int length = snap.KeyBufferSize(i) + 1;
 				char[] key = new char[length];
 				snap.GetKey(i, key, length);
-				
+
 				bool found;
-				int current;
+				int	 current;
 				do
 				{
 					int add = SplitString(key[current], " ", buffer2, sizeof(buffer2));
-					found = add != -1;
-					if(found)
+					found	= add != -1;
+					if (found)
 					{
 						current += add;
 					}
@@ -917,31 +918,32 @@ static ConfigMap FindWeaponSection(int entity)
 					{
 						strcopy(buffer2, sizeof(buffer2), key[current]);
 					}
-					
-					if(StringToInt(buffer2) == index)
+
+					if (StringToInt(buffer2) == index)
 					{
 						PackVal val;
 						cfg.GetArray(key, val, sizeof(val));
-						if(val.tag == KeyValType_Section)
+						if (val.tag == KeyValType_Section)
 						{
 							delete snap;
 							return val.cfg;
 						}
-						
+
 						break;
 					}
-				} while(found);
+				}
+				while (found);
 			}
 		}
-		
+
 		delete snap;
 	}
-	
+
 	GetEntityClassname(entity, buffer1, sizeof(buffer1));
 	Format(buffer1, sizeof(buffer1), "Classnames.%s", buffer1);
 	cfg = WeaponCfg.GetSection(buffer1);
-	if(cfg)
+	if (cfg)
 		return cfg;
-	
+
 	return null;
 }
